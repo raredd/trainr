@@ -276,7 +276,7 @@ out <- out[order(as.numeric(out[, 1]), decreasing = TRUE), ]
 out <- gsub('%', '', out)
 ```
 
-Toxicities attributed to study treatement (possible, probable, definite) are presented in Table 3. All patients received at least on dose of study treatment and were included in toxicity summary. The most common toxicities on study were `r print_counts(rep(tolower(names(nn <- tail(sort(table(tox$tox_desc)), 10))), nn), sep = ';')`.
+Toxicities attributed to study treatement (possible, probable, definite) are presented in Table 3. All patients received at least on dose of study treatment and were included in toxicity summary. The most common toxicities on study were `r print_counts(rep(tolower(names(nn <- tail(sort(table(worst$tox_desc)), 10))), nn), sep = ';')`.
 
 The highest overall grades experienced among all patients regardless of toxicity were `r print_counts(nn)`.
 

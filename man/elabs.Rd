@@ -14,9 +14,9 @@
 \tab \code{wbc} \tab white blood cell count (k/mcL) \cr
 \tab \code{hgb} \tab hemoglobin (g/dL) \cr
 \tab \code{platelets} \tab platelets  (k/mcL) \cr
-\tab \code{neutrophils} \tab neutrophils (%) \cr
-\tab \code{lymphocytes} \tab lymphocytes (%) \cr
-\tab \code{monocytes} \tab monocytes (%) \cr
+\tab \code{neutrophils} \tab neutrophils (\%) \cr
+\tab \code{lymphocytes} \tab lymphocytes (\%%) \cr
+\tab \code{monocytes} \tab monocytes (\%) \cr
 }}
 \usage{
 elabs
