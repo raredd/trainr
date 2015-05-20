@@ -23,12 +23,11 @@ strong {color: #ff0000 !important;}
 
 <div class="notes">
 
-  **Notes**
-  - do something
-  - do something again
+**Notes**  
+- candy  
+- usage  
 
 </div>
-
 
 
 ## background
