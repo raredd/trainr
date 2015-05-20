@@ -1,0 +1,373 @@
+---
+output:
+  html_document:
+    css: ./knitr.css
+    fig_caption: yes
+    highlight: default
+    keep_md: no
+    number_sections: no
+    theme: journal
+    toc: yes
+---
+
+May 2015 - master -- trainr
+
+```{r, message=FALSE}
+library('trainr')
+path <- system.file(package = 'trainr')
+```
+
+```{r frontmatter, child="./01-frontmatter.Rmd", include=FALSE}
+```
+
+```{r data, include=FALSE}
+opts_chunk$set(echo = TRUE)
+
+# ## read in all csv files in dir
+# lf <- list.files(file.path(path, 'extdata', 'csv'), full.names = TRUE,
+#                  pattern = '\\.csv')
+# l_dat <- setNames(lapply(lf, read.csv, stringsAsFactors = FALSE,
+#                          strip.white = TRUE, header = TRUE),
+#                   gsub('\\.csv', '', basename(lf)))
+
+
+## or generate data based on number of pts
+N <- 35
+source(file.path(path, 'scripts', '00-gen_data.R'))
+
+
+merge_all <- function(l, ...)
+  ## recursively merge list of data frames
+  ## usage: merge_all(list(dd1, dd2), by = 'id')
+  ## params:
+    ## l: a list of data frames
+    ## ... additional arguments passed to ?merge
+  Reduce(function(x, y) merge(x, y, ...), l)
+f_dt <- function(x) as.Date(x, origin = '1970-01-01')
+
+dd <- merge_all(list(demo, resp, surv, fwup), by = 'id', all = TRUE)
+
+dd <- dd1 <- within(dd, {
+  ## format dates
+  dt_dob <- dmy(d_dob, m_dob, y_dob)
+  dt_reg <- dmy(d_reg, m_reg, y_reg)
+  dt_resp <- dmy(d_resp, m_resp, y_resp)
+  dt_status <- dmy(d_status, m_status, y_status)
+  dt_fwup <- dmy(d_fwup, m_fwup, y_fwup)
+  dt_lastcontact <- f_dt(ifelse('Dead' %in% status, dt_status, dt_fwup))
+  
+  
+  ## calculate some useful stuff
+  stage <- as.character(as.roman(stage))
+  age_dx <- floor(as.numeric(dt_reg - dt_dob) / 365.242)
+  age_cat <- cut(age_dx, breaks = c(0, 50, 60, 70, 80, 100),
+                 labels = c(sprintf('%s - 50', min(age_dx)),
+                            '51 - 60', '61 - 70', '71 - 80',
+                            sprintf('81 - %s', max(age_dx))))
+  
+  
+  ## ipi factors: age > 60, ps > 1, elevated ldh, ens > 1, stage 3/4
+  age_ipi <- c('&le; 60','&gt; 60')[(age_dx > 60) + 1L]
+  ecog_ipi <- c('&le; 1','&gt; 1')[(ecog > 1) + 1L]
+  ldh_ipi <- ldh
+  ens_ipi <- c('&le; 1','&gt; 1')[(ens > 1) + 1L]
+  stage_ipi <- c('Stage I/II','Stage III/IV')[(stage %in% c('III', 'IV')) + 1L]
+  
+  ipi <- psum(age_dx > 60, ecog > 1, ldh %in% 'Elevated',
+              ens > 1, stage %in% c(3, 4))
+  ipi_risk <- c('Low','Low','Low-Int','High-Int','High','High')[ipi + 1]
+  ipi_risk <- factor(ipi_risk, levels = c('Low','Low-Int','High-Int','High'))
+  
+  
+  ## survival
+  os_ind <- ('Dead' %in% status) + 0L
+  dt_os <- f_dt(ifelse('Dead' %in% status, dt_status, dt_lastcontact))
+  os_time <- as.numeric(dt_os - dt_reg) / 30.4
+  
+  pfs_ind <- (('PD' %in% resp) + 0L) | (os_ind %in% 1)
+  dt_pfs <- f_dt(ifelse('PD' %in% resp, dt_resp, dt_os))
+  pfs_time <- as.numeric(dt_pfs - dt_reg) / 30.4
+})
+
+
+## table/figure counters:
+options(figure_counter = TRUE,
+        figure_counter_roman = TRUE)
+
+
+## prints n and percent of total N
+nnr <- function(x) sprintf('%s (%s%% of)', num2char(x), round(x / N * 100))
+```
+
+## Administrative Information
+
+From `r paste0(range(format(dd$dt_reg, '%B %Y')), collapse = ' to ')`, `r N` patients were enrolled on study at `r print_counts(dd$site)`. As per inclusion criteria, all patients were newly diagnosed diffuse large B-cell lymphoma (DLBCL). By study design patients were stratified by subtype, and all results were performed as such.
+
+`r nnr(N)` patients received at least one dose of study treatment and were included in toxicity and response analyses.
+
+## Patient Characteristics
+
+Patient characteristics are presented in Table 1. `r nnr(sum(dd$sex %in% 'Male'))` patients enrolled were male. The median age at diagnosis was `r intr(dd$age_dx)`. `r nnr(sum(dd$ipi > 1))` patients had International Prognostic Index (IPI) of two or more.
+
+```{r, results='asis'}
+by_var <- 'subtype'
+dd1[] <- lapply(dd1, function(x) if (is.character(x)) factor(x) else x)
+
+## wrapper functions to make tables
+median_minmax <- function(...) describeMedian(..., iqr = FALSE)
+
+get_stat <- function(var, by = by_var, data = dd1, digits = 0) {
+  getDescriptionStatsBy(data[, var], by = data[, by], percentage_sign = '',
+                        useNa = 'ifany', add_total_col = TRUE,
+                        show_all_values = TRUE, hrzl_prop = FALSE,
+                        statistics = FALSE, html = TRUE, digits = digits,
+                        continuous_fn = median_minmax)
+}
+
+make_table <- function(x, ...)
+  htmlTable(x, ..., ctable = TRUE, align = 'ccc', title = '',
+            cgroup = c('', 'Subtype'), n.cgroup = c(1, 2),
+            css.tspanner = "font-weight: 900; text-align: center;")
+
+## table headers common to (most) tables
+tbl_headers <- c(sprintf('All patients<br /><font size=1>N = %s</font>', N),
+                 sprintf('%s<br><font weight=normal; size=1>n = %s</font>',
+                         levels(dd1[[by_var]])[1],
+                         sum(dd1[[by_var]] == levels(dd1[[by_var]])[1])),
+                 sprintf('%s<br><font weight=normal; size=1>n = %s</font>',
+                         levels(dd1[[by_var]])[2],
+                         sum(dd1[[by_var]] == levels(dd1[[by_var]])[2])))
+
+
+## select variables to use in table 1
+tbl <- list()
+## clin vars
+tbl[['Site']] <- get_stat('site')
+tbl[['Sex']] <- get_stat('sex')
+tbl[['Race']] <- get_stat('race')
+tbl[['Ethnicity']] <- get_stat('ethnic')
+## ipi 
+tbl[['Age at diagnosis']] <- rbind(get_stat('age_dx'),
+                                   get_stat('age_cat'))
+tbl[['ECOG PS']] <- rbind(get_stat('ecog'),
+                          get_stat('ecog_ipi'))
+# tbl[['Disease stage']] <- rbind(get_stat('stage'),
+#                                 get_stat('stage_ipi'))
+tbl[['Disease stage']] <- get_stat('stage_ipi')
+tbl[['LDH']] <- get_stat('ldh')
+tbl[['ENS']] <- rbind(get_stat('ens'),
+                      get_stat('ens_ipi'))
+tbl[['IPI']] <- get_stat('ipi_risk')
+
+
+## combine summaries into matrix and add total row at bottom
+out <- rbind(do.call(rbind, tbl),
+             c(nrow(dd), sprintf('%s (%s)', table(dd$subtype),
+                                 round(table(dd$subtype) / N * 100))))
+## some formatting for table
+rgroup <- names(tbl)
+n.rgroup <- unname(sapply(rgroup, function(x) nrow(tbl[[x]])))
+n.tspanner <- sapply(list(1:4, 5:10),
+                     function(x) nrow(do.call('rbind', tbl[x])))
+
+colnames(out) <- tbl_headers
+## 0 counts/percents make table harder to read
+out <- gsub('0 (0)', '-', out, fixed = TRUE)
+
+
+make_table(out, rgroup = c(rgroup, 'Total'), n.rgroup = c(n.rgroup, 1),
+          tspanner = c('','IPI factors',''), n.tspanner = c(n.tspanner, 1),
+          tfoot = paste0('<font size=1><sup>&dagger;</sup>Some note.<br />',
+                         'Abbreviations: IPI, international prognostic score; ',
+                         'ECOG PS, Eastern Cooperative<br />Oncology Group ',
+                         'performance score.</font>'),
+          caption = 'Table 1: Patient characteristics.')
+```
+
+## Baseline labs
+
+Lab results at study entry are presented in Table 2. The median sum of largest tumor diameters at baseline was `r median(blabs$ltd)` for all patients and `r paste0(round(with(blabs, tapply(ltd, dd$subtype, median)), 1), collapse = ' and ')` for ABC and GCB suptype patients, respectively.
+
+```{r, results='asis'}
+blabs1 <- merge(blabs, dd[, c('id','subtype')])
+blabs1$id <- NULL
+nums <- sapply(blabs1, is.numeric)
+nums <- names(nums[nums])
+
+## calculate statistics only for the numeric lab variables
+out <- setNames(lapply(names(blabs1[, nums]), function(x)
+  get_stat(x, data = blabs1, digits = 1)), nums)
+out <- do.call('rbind', out)
+colnames(out) <- tbl_headers
+
+## formatting
+nums <- ifelse(nchar(nums) < 4, toupper(nums),
+               gsub('(.)(.*)', '\\U\\1\\L\\2', nums, perl = TRUE))
+
+
+make_table(out, rgroup = nums, n.rgroup = rep(1, length(nums)),
+           caption = 'Table 2: Baseline lab results')
+```
+
+```{r, fig.cap='Percent change in hemoglobin values from baseline to end of treatment. ABC and GCB patients shown in grey and blue, respectively.'}
+hgb_change <- within(merge(blabs, demo[, c('id','subtype')]), {
+  change <- (hgb - elabs$hgb) / hgb
+})
+hgb_change <- hgb_change[order(hgb_change$change), ]
+
+
+## waterfall plot
+par(mar = c(3, 5.5, 2, .5), family = 'HersheySerif',
+    las = 1, tcl = .2)
+with(hgb_change,
+     barplot(change, border = NA, xlab = 'Patients', 
+             ylab = 'Change in HgB (%)\nfrom baseline',
+             col = ifelse(subtype %in% 'ABC', 'grey50', 'dodgerblue2')))
+mtext('Patients', side = 1)
+box('outer')
+```
+
+## Treatment toxicities
+
+```{r}
+## get tox code info
+tox <- cbind(tox, rawr::match_ctc(tox$tox_code)$matches[, c('tox_desc','tox_cat')])
+
+
+# ## get worst grades by id, toxicity code
+# tox1 <- tox[with(tox, order(id, tox_desc, -xtfrm(tox_grade))), ]
+# tox1 <- tox1[with(tox1, !duplicated(cbind(id, tox_desc))), ]
+# 
+# tox2 <- tox_worst(tox, 'id')$tox_worst
+# identical(tox1, tox2)
+
+
+worst <- tox_worst(tox)$tox_worst
+worst <- merge(worst, dd[, c('id','subtype')])
+worst <- within(worst, {
+  tox_desc <- factor(tox_desc)
+  subtype <- factor(subtype)
+  tox_grade12 <- ifelse(tox_grade %in% 1:2, 0, tox_grade)
+  tox_grade12 <- factor(tox_grade12, levels = c(0, levels(tox_grade)),
+                        labels = c('1 - 2', levels(tox_grade)))
+  ## comment out to separate levels 1,2
+  ## repeat similar to combine/separate levels 3,4 or others
+  tox_grade <- droplevels(tox_grade12)
+  worst_overall <- ave(as.numeric(tox_grade), id, FUN = max)
+})
+
+
+n <- table(dd$subtype)
+## worst tox grade overall per pt
+nn <- table(with(worst, tapply(as.numeric(tox_grade), id, max)))
+
+
+tt <- list(tabler_by(worst, 'tox_desc', 'subtype', n,
+                     zeros = '-')[, 1, drop = FALSE],
+           tabler_by(worst[worst$subtype %in% 'ABC', ],
+                     'tox_desc', 'tox_grade', n = n[1], zeros = '-'),
+           tabler_by(worst[worst$subtype %in% 'GCB', ],
+                     'tox_desc', 'tox_grade', n = n[2], zeros = '-'))
+colnames(tt[[1]]) <- sprintf('Total<br /><font size=1>n = %s</font>', sum(n))
+out <- do.call('cbind', tt)
+out <- out[order(as.numeric(out[, 1]), decreasing = TRUE), ]
+
+## no percent signs
+out <- gsub('%', '', out)
+```
+
+Toxicities attributed to study treatement (possible, probable, definite) are presented in Table 3. All patients received at least on dose of study treatment and were included in toxicity summary. The most common toxicities on study were `r print_counts(rep(tolower(names(nn <- tail(sort(table(tox$tox_desc)), 10))), nn), sep = ';')`.
+
+The highest overall grades experienced among all patients regardless of toxicity were `r print_counts(nn)`.
+
+```{r, results='asis'}
+htmlTable(out, cgroup = c('', tbl_headers[-1]), n.cgroup = sapply(tt, ncol),
+  tfoot = paste0('<font size=1><sup>&dagger;</sup>Percentages represent ',
+            'proportion of patients out of respective phase total.</font>'),
+  caption = 'Table 3: Toxicities<sup>&dagger;</sup> by subtype, grade.')
+```
+
+## Outcome summary
+
+```{r outcome}
+## response
+responders <- grepl('R', resp$resp)
+pr_better <- resp$resp %in% c('PR','CR')
+crs <- resp$resp %in% 'CR'
+
+
+## survival models and plots
+os_fit <- survfit(Surv(os_time, os_ind) ~ subtype,
+                  data = dd, conf.type = 'log-log')
+pfs_fit <- survfit(Surv(pfs_time, pfs_ind) ~ subtype,
+                   data = dd, conf.type = 'log-log')
+```
+
+### Response to treatment
+
+The primary outcome was overall response rate (MR, PR, CR) at end of treatment. All patients received at least one dose of study treatment and were included in response assessment, and all patients were evaluated for EOT response.
+
+The overall response rate of MR or better was `r binconr(sum(responders), N)`. `r nnr(sum(pr_better))` patients experienced a PR or better at EOT (`r binconr(sum(pr_better), N, est = FALSE)`). `r nnr(sum(crs))` patients experienced a CR or better (`r binconr(sum(crs), N, est = FALSE)`).
+
+### Time-to-event
+
+Patients were followed for progression-free and overall survival, and results are reporte in Tables 4 and 5.
+
+```{r survtbl, results='asis'}
+pfs <- surv_table(pfs_fit, digits = 2)
+os <- surv_table(os_fit, digits = 2)
+
+f <- function(x, cap)
+  htmlTable(do.call('rbind', x), caption = cap,
+          tspanner = c('ABC','GCB'), n.tspanner = sapply(x, nrow))
+
+f(pfs, cap = 'Table 4: Progression-free survival.')
+
+f(os, cap = 'Table 5: Overall survival.')
+```
+
+```{r survfig, fig.width=8, fig.height=9, fig.cap='Time-to-event endpoints, profression-free (panel A) and overall (B) survival.'}
+## survival plot wrapper
+surv_plot <- function(x, ...) {
+  rawr::kmplot(x, col.band = NA, col.surv = seq_along(x$strata),
+               legend = FALSE, xlab = 'Time (months)',
+               family = 'HersheySerif', ..., mar = c(6, 10, 2, 2))
+}
+
+mt <- function(x)
+  mtext(side = 3, text = x, at = -5,
+      family = 'HersheySerif', font = 2, cex = 1.5)
+  
+
+par(mfrow = c(2, 1), bty = 'l')
+surv_plot(pfs_fit, ylab = 'PFS probability', add = TRUE)
+mt('A')
+surv_plot(os_fit, ylab = 'OS probability', add = TRUE)
+mt('B')
+box('outer')
+```
+
+## Discussion
+
+Good programming practices and using `knitr` to create dynamic documents can make your life so much easier.
+
+---
+
+```{r session}
+sessionInfo()
+```
+
+## References
+
+Loprinzi CL. Laurie JA. Wieand HS. Krook JE. Novotny PJ. Kugler JW. Bartel J. Law M. Bateman M. Klatt NE. et al. "Prospective evaluation of prognostic variables from patient-completed questionnaires." North Central Cancer Treatment Group. *Journal of Clinical Oncology*. 12(3):601-7, 1994.
+
+```{r, results='asis'}
+## r citation
+print(citation(), style = 'html')
+print(citation(package = 'survival'), style = 'html')
+```
+
+## Appendix
+
+```{r append, child='./99-append.Rmd'}
+```

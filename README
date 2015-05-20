@@ -1,0 +1,31 @@
+Date:
+
+  01-Jan-2015
+
+DESCRIPTION:
+
+ This directory contains data, analysis files, and output used in some
+ analysis.
+
+DEPENDS:
+
+ Gmisc
+ htmlTable
+ rawr package: (github.com/raredd/rawr): misc tools littered throughout code
+ survival
+
+DIRS:
+
+ inst:
+  docs: SAPs, pdf, word docs, papers, etc
+  extdata: clean csv files used in analyses; spreadsheets, raw/uncleaned data
+  out: final output files
+  pres: presentation materials
+  scripts: r, sas scripts not used for analyses (used in exploration)
+  source: Rmd analysis files
+  
+ man: r man/documentation
+ 
+ R: r functions, data set documentation
+ 
+ vignettes: vignette

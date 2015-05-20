@@ -1,0 +1,19 @@
+Package: trainr
+Type: Package
+Title: Analysis project and presentation.
+Version: 0.0.0.9000
+Authors@R: person("Robert", "Redd", email = "rredd@jimmy.harvard.edu",
+    role = c("aut", "cre"))
+Description: This package contains data, scrips, etc. for an analysis.
+Depends:
+    Gmisc,
+    htmlTable,
+    survival
+Imports:
+    devtools
+Suggests:
+    knitr
+License: file LICENSE
+LazyData: yes
+Roxygen: list(wrap = FALSE)
+VignetteBuilder: knitr

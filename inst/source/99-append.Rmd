@@ -1,0 +1,24 @@
+This is the appendix. We put long table listings and older or less relevant analyses here.
+
+### All response data
+
+```{r, results='asis'}
+out <- as.matrix(resp)
+
+## only show a subset
+out <- rbind(out[1:10, ], '...')
+
+htmlTable(out, caption = 'Table A1: All response data.')
+```
+
+### All toxicity data
+
+```{r, results='asis'}
+out <- as.matrix(tox)
+
+## only show a subset
+out <- rbind(out[1:10, ], '...')
+
+
+htmlTable(out, align = 'cccll', caption = 'Table A2: All toxicity data.')
+```

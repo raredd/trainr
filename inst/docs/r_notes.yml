@@ -1,0 +1,90 @@
+---
+Title:
+  Computing in R notes
+
+Notes:
+  - wtf per minute pic
+  - straight-forward, verbose code vs clever, perplexing
+
+Functions:
+  - "DRY don't repeat yourself"
+  - "functionals (*apply), anonymouns functions"
+  - modular reusable tools
+  - do one thing and do it well
+  - small, easy-to-understand pieces that can combine into something more complex
+
+Examples:
+  - Round
+  - nr
+  - countr
+  - num2char
+  - intr
+  - binconr
+  - pvalr
+  - roundr
+  - tabler
+  - extract dates from comment field
+  - text process treatment info, other write in info
+  - do.call with list of arguments to save typing
+  - dmy
+  - rbindfill2
+
+Misc_points:
+  - do not grow objects
+  - do not use attach
+    - SAS, procs use most recent data set implicitly or reference explicitly
+    - returning to a script and trying to figure out where variables reside 
+    - alternatives, with, within, data=
+  - do not use subset
+    - "ex subset(mtcars, cyl = 4)"
+
+Graphics:
+  - make them look good for fucksake, they are going to be around for a while
+  - graphics are terrible, tables are obnoxious
+  - learn base graphics well, more efficient to make plots well once
+    - "http://www.r-bloggers.com/why-i-think-twice-before-editing-plots-in-powerpoint-illustrator-inkscape-etc/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+RBloggers+%28R+bloggers%29"
+
+Styling_and_commenting:
+  - very personal
+  - the best way to learn is to teach someone else; thus, program for others
+  - "our brains are designed to recognize patterns - consistent pattern and
+    formatting goes away and see meta data clearly; hone in on abberations, 
+    logic, bugs; everything else goes away, and see content"
+  - only thing that matters in a style is consistency
+  - "!! have a coding style and follow it; be consistent !!"
+  - comment _what_ code does not _how_ code works
+  -  80 characters forces good code and logic to avoid long lines and wrapping
+
+Soloway_Ehrlich:
+     "It is not merely a matter of aesthetics that programs
+     should be written in a particular style.  Rather there
+     is a psychological basis for writing programs in a
+     conventional manner: programmers have strong
+     expectations that other programmers will follow these
+     discourse rules.  If the rules are violated, then the
+     utility afforded by the expectations that programmers
+     have built up over time is effectively nullified."
+
+Overall_points:
+  - computing is the backbone of science
+  - "cannot find a scientific paper without theoretical modeling, data analysis,
+    data acquisition, etc"
+  - "every results depends on computing which means that if we do not do
+    computing well, we have a problem"
+  - comuter time is cheap, and human time (and frustration) is expensive
+  - "Reproducibility: past, present"
+  - "Automation: future"
+  - "Package: put everything in a workable environment"
+  - 80 pct of the work is in data manipulation
+  - "Divide each difficulty into many parts as is feasible and necessary to
+     resolve it." Rene Descartes
+  - Ensure you record your work in a reproducible script. From time-to-time,
+    reopen R, then source() your script. You will clean out anything you are
+    no longer using, and as an added benefit you will have tested your code.
+
+R_inferno:
+  - "5.2, simplicity"
+    - "human efficient, simple to understand and modify"
+    - computer efficient
+    - less buggy and easier to debug
+    - more general with broader applications

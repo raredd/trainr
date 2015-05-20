@@ -1,0 +1,90 @@
+```{r}
+library('knitr')
+
+## package options
+opts_knit$set(eval.after = 'fig.cap', progress = TRUE,  width = 80, 
+              verbose = TRUE, par = TRUE)
+
+## global chunk options:
+opts_chunk$set(cache = FALSE, tidy = FALSE, echo = FALSE,
+               dev.args = list(antialias = 'none', bg = 'transparent'),
+               dev = 'CairoPNG', dpi = 150, fig.align = 'center',
+               warning = FALSE, message = FALSE)
+
+
+knit_hooks$set(par = function(before, options, envir) {
+                 if (before && options$fig.show != 'none') 
+                   par(mar = c(4,4,.1,.1), cex.lab = .95, cex.axis = .9, 
+                       mgp = c(2,.7,0), tcl = -.3)
+                 },
+               plot = function(x, options) {
+                 fig_fn = paste0(opts_knit$get('base.url'),
+                                 paste(x, collapse = '.'))
+                 fig.cap <- knitr:::.img.cap(options)
+                 style = c('display:block',
+                           sprintf('margin: %s;',
+                                   switch(options$fig.align,
+                                          left = 'auto auto auto 0',
+                                          center = 'auto',
+                                          right = 'auto 0 auto auto')))
+                 addon_args <- ''
+                 fig_number_txt <- ''
+                 cntr <- getOption('figure_counter', FALSE)
+                 if (cntr != FALSE) {
+                   if (is.logical(cntr))
+                     cntr <- 1
+                   ## figure_counter_str allows for custom figure text, 
+                   ## eg, <b> Figure %s:</b>
+                   ## the %s allows for setting the counter manually to 1a, 1b, 
+                   ## etc if needed
+                   fig_number_txt <- 
+                     sprintf(getOption('figure_counter_str', 'Figure %s: '),
+                             ifelse(getOption('figure_counter_roman', FALSE),
+                                    as.character(as.roman(cntr)), 
+                                    as.character(cntr)))
+                   if (is.numeric(cntr))
+                     options(figure_counter = cntr + 1)
+                   }
+                 paste0("<figure><img src='", fig_fn, "'"," ", addon_args,
+                        paste0(" style='", paste(style, collapse = '; '), 
+                               "'"),'>',
+                        '<figcaption>', fig_number_txt, fig.cap, 
+                        '</figcaption></figure>')
+                 })
+
+## fonts for images
+library('Cairo')
+CairoFonts(regular = 'Arial:style=Regular',
+           bold = 'Arial:style=Bold',
+           italic = 'Arial:style=Italic',
+           bolditalic = 'Arial:style=Bold Italic,BoldItalic',
+           symbol = 'Symbol')
+```
+
+###### GCB vs non-GCB in DLBCL (15-000)
+
+###### A comparison of clinical outcomes by genetic subtype in patients with newly diagnosed DLBCL
+
+###### Most recent compile: `r as.character(format(Sys.Date(), format = '%d %B %Y'))`
+
+###### Department of Biostatistics and Computational Biology<br />Dana Farber Cancer Institute
+
+###### Statisticians:<br />Robert Redd, <a href="mailto:rredd@jimmy.harvard.edu?subject=DLBCL">email</a>
+
+###### <font size = 1>All analyses were performed using `r R.Version()$version.string` and packages `survival` v`r packageVersion('survival')` for time-to-event analyses; and `knitr` v`r packageVersion('knitr')` for reproducible research.</font>
+
+## Summary
+
+The primary outcome was
+    - overall response rate (ORR)
+
+The secondary outcomes were:
+    - rate of PR, CR or better
+    - progression-free survival
+    - overall survival
+
+Some patients responsed and there were some toxicities. This summay should be written better.
+
+## Statistical considerations
+
+Responses to study treatment were reported as proportions with 95% exact binomial confidence intervals. Time-to-event endpoints were summarized using the Kaplan-Meier method with variance estimated using the log-log transformation.
