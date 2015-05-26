@@ -118,7 +118,7 @@ median_minmax <- function(...) describeMedian(..., iqr = FALSE)
 
 get_stat <- function(var, by = by_var, data = dd1, digits = 0) {
   getDescriptionStatsBy(data[, var], by = data[, by], percentage_sign = '',
-                        useNa = 'ifany', add_total_col = TRUE,
+                        useNA = 'ifany', add_total_col = TRUE,
                         show_all_values = TRUE, hrzl_prop = FALSE,
                         statistics = FALSE, html = TRUE, digits = digits,
                         continuous_fn = median_minmax)

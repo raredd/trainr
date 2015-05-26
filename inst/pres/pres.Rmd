@@ -247,7 +247,7 @@ with version control ([git](http://git-scm.com), [github](https://github.com)):
 ## **4** don't repeat yourself
 
 - write (and test) functions *once* and re-use
-    - add frequently-used functons (or data) to a personal package
+    - add frequently-used functions (or data) to a personal package
 
 - repeating similar tasks in the same project
     - "Treatments included <font color="#3399FF">RCHOP (n = 10, 50%), R-CVP (n = 5, 30%), and RCHOEP (n = 4, 20%)</font>"
