@@ -79,11 +79,11 @@ The primary outcome was
     - overall response rate (ORR)
 
 The secondary outcomes were:
-    - rate of PR, CR or better
-    - progression-free survival
+    - rate of PR, CR or better  
+    - progression-free survival  
     - overall survival
 
-Some patients responsed and there were some toxicities. This summay should be written better.
+Some patients responsed and there were some toxicities. This summary should be written better.
 
 ## Statistical considerations
 

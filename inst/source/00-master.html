@@ -91,8 +91,8 @@ path &lt;- system.file(package = 'trainr')</code></pre>
 <div id="a-comparison-of-clinical-outcomes-by-genetic-subtype-in-patients-with-newly-diagnosed-dlbcl" class="section level6">
 <h6>A comparison of clinical outcomes by genetic subtype in patients with newly diagnosed DLBCL</h6>
 </div>
-<div id="most-recent-compile-20-may-2015" class="section level6">
-<h6>Most recent compile: 20 May 2015</h6>
+<div id="most-recent-compile-16-june-2015" class="section level6">
+<h6>Most recent compile: 16 June 2015</h6>
 </div>
 <div id="department-of-biostatistics-and-computational-biologydana-farber-cancer-institute" class="section level6">
 <h6>Department of Biostatistics and Computational Biology<br />Dana Farber Cancer Institute</h6>
@@ -106,8 +106,8 @@ path &lt;- system.file(package = 'trainr')</code></pre>
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>The primary outcome was - overall response rate (ORR)</p>
-<p>The secondary outcomes were: - rate of PR, CR or better - progression-free survival - overall survival</p>
-<p>Some patients responsed and there were some toxicities. This summay should be written better.</p>
+<p>The secondary outcomes were: - rate of PR, CR or better<br /> - progression-free survival<br /> - overall survival</p>
+<p>Some patients responsed and there were some toxicities. This summary should be written better.</p>
 </div>
 <div id="statistical-considerations" class="section level2">
 <h2>Statistical considerations</h2>
@@ -129,7 +129,7 @@ median_minmax &lt;- function(...) describeMedian(..., iqr = FALSE)
 
 get_stat &lt;- function(var, by = by_var, data = dd1, digits = 0) {
   getDescriptionStatsBy(data[, var], by = data[, by], percentage_sign = '',
-                        useNa = 'ifany', add_total_col = TRUE,
+                        useNA = 'ifany', add_total_col = TRUE,
                         show_all_values = TRUE, hrzl_prop = FALSE,
                         statistics = FALSE, html = TRUE, digits = digits,
                         continuous_fn = median_minmax)
@@ -2192,20 +2192,20 @@ Figure II: Time-to-event endpoints, profression-free (panel A) and overall (B) s
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] git2r_0.10.1        formatR_1.2         RColorBrewer_1.1-2 
-##  [4] plyr_1.8.2          bitops_1.0-6        tools_3.2.0        
-##  [7] testthat_0.9.1      rpart_4.1-9         digest_0.6.8       
-## [10] forestplot_1.1      evaluate_0.7        memoise_0.2.1      
-## [13] gtable_0.1.2        lattice_0.20-31     yaml_2.1.13        
+##  [4] plyr_1.8.2          tools_3.2.0         testthat_0.10.0    
+##  [7] rpart_4.1-9         digest_0.6.8        forestplot_1.1     
+## [10] evaluate_0.7        memoise_0.2.1       gtable_0.1.2       
+## [13] lattice_0.20-31     curl_0.8            yaml_2.1.13        
 ## [16] proto_0.3-10        gridExtra_0.9.1     rawr_0.6.0         
-## [19] stringr_1.0.0       cluster_2.0.1       rversions_1.0.0    
-## [22] devtools_1.8.0      grid_3.2.0          nnet_7.3-9         
-## [25] plotrix_3.5-11      XML_3.98-1.1        foreign_0.8-63     
+## [19] xml2_0.1.1          stringr_1.0.0       cluster_2.0.1      
+## [22] rversions_1.0.1     devtools_1.8.0      grid_3.2.0         
+## [25] nnet_7.3-9          plotrix_3.5-12      foreign_0.8-63     
 ## [28] rmarkdown_0.6.1     latticeExtra_0.6-26 Formula_1.2-1      
 ## [31] ggplot2_1.0.1       reshape2_1.4.1      magrittr_1.5       
 ## [34] Hmisc_3.16-0        scales_0.2.4        htmltools_0.2.6    
 ## [37] splines_3.2.0       MASS_7.3-40         abind_1.4-3        
 ## [40] colorspace_1.2-6    stringi_0.4-1       acepack_1.3-3.3    
-## [43] RCurl_1.95-4.6      munsell_0.4.2</code></pre>
+## [43] munsell_0.4.2       crayon_1.2.1</code></pre>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
