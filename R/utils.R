@@ -1,4 +1,8 @@
-## utils: 15-000
+### utils: 15-000
+# intr, worst_tox, tabler_by, binconr, surv_table, psum, dmy, print_counts,
+# ipr, num2char
+###
+
 
 #' Interval formatter
 #' 
@@ -35,7 +39,6 @@ intr <- function(..., fun = median, conf = NULL, digits = 0, na.rm = FALSE) {
       sprintf('%s (range: %s - %s)', val, bounds[1], bounds[2])
   })
 }
-
 
 #' Worst toxicities
 #' 
