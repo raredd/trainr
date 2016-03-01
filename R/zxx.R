@@ -1,19 +1,21 @@
 ### internal utils: 15-000
-# %ni%, upcase, strip_white, %inside%, surv_summary
+# %ni%, upcase, %inside%, surv_summary
 ###
 
 
 '%ni%' <- Negate(`%in%`)
 
 ## uppercase first letter of string
-upcase <- function(x)
+upcase <- function(x) {
+  ## upcase('hello')
   paste(toupper(substr(x, 1, 1)), substring(x, 2), sep = '', collapse = ' ')
-
-## strip leading/trailing whitespace
-strip_white <- function(x) gsub('^\\s+|\\s+$', '', x)
+}
 
 ## numerics inside intervals
 '%inside%' <- function(x, interval) {
+  ## 1:5 %inside% c(4,7)
+  ## .5 %inside% c(1/2, 3/2)
+  stopifnot(length(interval) == 2L)
   interval <- sort(interval)
   x >= interval[1] & x <= interval[2]
 }
@@ -23,7 +25,7 @@ surv_summary <- function(s, digits = max(getOption('digits') - 4, 3), ...) {
   
   ## error checks
   if (!inherits(s, 'survfit')) 
-    stop('s must be a survfit object')
+    stop('\'s\' must be a survfit object')
   
   x <- summary(s, ...)
   

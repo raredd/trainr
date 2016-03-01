@@ -35,8 +35,7 @@ intr <- function(..., fun = median, conf = NULL, digits = 0, na.rm = FALSE) {
     val <- round(fun(x, na.rm = na.rm), digits = digits)
     if (!conf %in% c(0, 1))
       sprintf('%s (%s%% CI: %s - %s)', val, conf * 100, bounds[1], bounds[2])
-    else
-      sprintf('%s (range: %s - %s)', val, bounds[1], bounds[2])
+    else sprintf('%s (range: %s - %s)', val, bounds[1], bounds[2])
   })
 }
 
@@ -98,16 +97,17 @@ tox_worst <- function(dat, id = 'id', tox_desc = 'tox_desc',
 #' columns
 #' 
 #' @examples
-#' set.seed(1618)
-#' 
+#' ## generate data
+#' set.seed(1)
 #' f <- function(x, ...) sample(x, 100, replace = TRUE, ...)
-#' tox <- data.frame(casenum = rep(1:10, 10), phase = 1:2,
+#' tox <- data.frame(id = rep(1:10, 10), phase = 1:2,
 #'                   tox_code = f(rawr::ctcae_v4$tox_code[1:25]),
 #'                   tox_grade = f(1:3, prob = c(.6, .3, .1)),
 #'                   stringsAsFactors = FALSE)
 #' 
 #' n <- table(tox[1:10, ]$phase)
-#' tox <- cbind(tox, match_ctc(tox$tox_code)$matches[, c('tox_cat', 'tox_desc')])
+#' tox <- cbind(tox,
+#'   rawr::match_ctc(tox$tox_code)$matches[, c('tox_cat', 'tox_desc')])
 #' 
 #' tox <- within(tox, {
 #'   phase <- factor(phase)
@@ -119,6 +119,7 @@ tox_worst <- function(dat, id = 'id', tox_desc = 'tox_desc',
 #' ## get worst toxicities by casenum by grade
 #' tox <- tox_worst(tox)$tox_worst
 #' 
+#' ## summarize and format matrix for printing
 #' out <- cbind(tabler_by(tox, 'tox_desc',
 #'                        'phase', n = n, zeros = '-')[, 1, drop = FALSE],
 #'              tabler_by(tox[tox$phase == '1', ], 'tox_desc',
@@ -127,10 +128,11 @@ tox_worst <- function(dat, id = 'id', tox_desc = 'tox_desc',
 #'                        'tox_grade', n = n[2], zeros = '-'))
 #' out <- out[order(as.numeric(out[, 1]), decreasing = TRUE), ]
 #' 
-#' library('htmlTable')
 #' cgroup <- c(sprintf('Total<br /><font size=1>n = %s</font>', sum(n)),
 #'             sprintf('Phase I<br /><font size=1>n = %s</font>', n[1]),
 #'             sprintf('Phase II<br /><font size=1>n = %s</font>', n[2]))
+#' 
+#' library('htmlTable')
 #' htmlTable(out, ctable = TRUE, cgroup = cgroup, n.cgroup = c(1, 4, 4),
 #'     caption = 'Table 1: Toxicities<sup>&dagger;</sup> by phase and grade.',
 #'     col.columns = rep(c('grey97','none','grey97'), times = c(1, 4, 4)),
@@ -192,12 +194,18 @@ tabler_by <- function(dat, varname, byvar, n, order = FALSE, zeros,
 
 #' Exact binomial confidence interval formatter
 #' 
+#' Calculates exact binomial confidence interval (\code{\link[Hmisc]{binconf}})
+#' and prints formatted string.
+#' 
 #' @param r successes
 #' @param n observations
 #' @param conf confidence level
 #' @param digits number of digits after decimal
 #' @param est logical; if \code{TRUE}, the point estimate is also printed
 #' @param method method to use; see \code{\link[Hmisc]{binconf}}
+#' 
+#' @seealso
+#' \code{\link[Hmisc]{binconf}}; \code{desmon::binci}
 #' 
 #' @examples
 #' binconr(5, 10, est = FALSE)
@@ -214,7 +222,7 @@ binconr <- function(r, n, conf = 0.95, digits = 0, est = TRUE, method = 'exact')
   zzz
 }
 
-#' survfit summary table
+#' \code{survfit} summary table
 #' 
 #' Prints a formatted summary table with estimates and confidence intervals
 #' for \code{\link{suvfit}} objects.
@@ -222,7 +230,7 @@ binconr <- function(r, n, conf = 0.95, digits = 0, est = TRUE, method = 'exact')
 #' @param s an object of class \code{\link{survfit}}
 #' @param digits number of digits after decimal
 #' @param times vector of survival times
-#' @param \dots additional arguments passed to \code{\link{summary.surfit}}
+#' @param ... additional arguments passed to \code{\link{summary.surfit}}
 #' 
 #' @examples
 #' \dontrun{
@@ -251,8 +259,7 @@ surv_table <- function(s, digits = 3, times = pretty(range(s$time)), ...) {
                    sprintf('OR (%s%% CI)', s$conf.int * 100)))
   }
   if (is.list(summ))
-    Map(f = f, summ)
-  else f(summ)
+    Map(f = f, summ) else f(summ)
 }
 
 #' Pairwise sum
@@ -262,16 +269,20 @@ surv_table <- function(s, digits = 3, times = pretty(range(s$time)), ...) {
 #' Each vector passed in \code{...} must be equal in length. The function
 #' coerces the vectors into a matrix and \code{\link{rowSums}} the rows.
 #' 
-#' @param \dots numeric vectors
+#' @param ... numeric vectors
 #' @param na.rm logical; if \code{TRUE}, omits missing values (including
 #' \code{\link{NaN}}) from calculations
 #' 
-#' @return A single vector of element-wise sums.
-#' @seealso \code{\link{pmin}}, \code{\link{pmax}}
+#' @return
+#' A single vector of element-wise sums.
+#' 
+#' @seealso
+#' \code{\link{pmin}}, \code{\link{pmax}}
 #' 
 #' @examples
 #' x <- c(-1, NA, 4, 5)
 #' y <- c(NA, NA, 6, -1)
+#' 
 #' psum(x, y)
 #' psum(x, y, na.rm = TRUE)
 #' 
@@ -287,7 +298,7 @@ psum <- function(..., na.rm = FALSE) {
 
 #' Date parse
 #' 
-#' Parse day/month/year column data into standard date format
+#' Parse day/month/year column data into standard date format.
 #' 
 #' For two-digit years, the origin year should be specified; otherwise, the
 #' default of 1900 will be used. For NA year, month, or day, origin is used
@@ -320,11 +331,12 @@ dmy <- function(d, m, y, origin = c(1, 1, 1900)) {
 #' Formats and prints vectors with Ns and percents.
 #' 
 #' @param x a vector of character strings (or factors)
-#' @param \dots additional arguments passed to \code{\link{ipr}}
-#' @examples
+#' @param sep separator; see \code{\link{ipr}}
 #' 
+#' @examples
 #' table(tx <- rep(c('RCHOP','R-CVP','RCHOEP'), c(10, 6, 4)))
 #' print_counts(tx)
+#' 
 #' @export
 
 print_counts <- function(x, ...) {
@@ -332,11 +344,20 @@ print_counts <- function(x, ...) {
   ipr(sprintf('%s (n = %s, %s%%)', names(tt), tt, round(tt / sum(tt) * 100)), ...)
 }
 
-#' Collapse using commas and "and"
+#' Collapse vectors for printing
+#' 
+#' Collapse a vector using commas and "and" for readability.
+#' 
 #' @param x a vector
 #' @param sep separator
+#' 
 #' @examples
-#' ipr(1); ipr(1:2); ipr(1:5, sep = ';')
+#' ipr(1)
+#' ipr(1:2)
+#' ipr(1:5, sep = ';')
+#' 
+#' ipr(Vectorize(num2char)(1:5, cap = FALSE))
+#' 
 #' @export
 
 ipr <- function(x, sep = ',') {
@@ -349,6 +370,8 @@ ipr <- function(x, sep = ',') {
 
 #' Numeric to character string
 #' 
+#' Convert numeric to word representation.
+#' 
 #' @param num integer in [-999, 999]
 #' @param informal logical; if \code{TRUE}, adds "and" before tens or ones
 #' @param cap logical; if \code{TRUE}, capitalized first word
@@ -356,9 +379,8 @@ ipr <- function(x, sep = ',') {
 #' @examples
 #' num2char(28, informal = TRUE)
 #' 
-#' v_num2char <- Vectorize(num2char)
 #' nums <- c(-100, 110, 322, 012, 201, -152, 4)
-#' v_num2char(nums)
+#' Vectorize(num2char)(nums)
 #' 
 #' @export
 
@@ -393,10 +415,10 @@ num2char <- function(num, informal = FALSE, cap = TRUE) {
     else f1(x, informal = informal)
   }
   ## trim leading/trailing whitespace
-  zzz <- strip_white(f2(num, informal = informal))
+  zzz <- trimws(f2(num, informal = informal))
   ## trim double whitespace
   zzz <- upcase(gsub('\\s{2,}', ' ', zzz))
-  ## trim ands in special cases
+  ## trim 'and' in special cases
   zzz <- ifelse(cap, upcase(gsub('And\ |\ and*$', '', zzz)),
                 gsub('And\ |\ and*$', '', zzz))
   zzz <- ifelse(neg, paste0('negative ', tolower(zzz)), tolower(zzz))
