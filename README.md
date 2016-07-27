@@ -1,4 +1,4 @@
-Better practices for statistical comupting in r
+Better practices for statistical computing in r
 
 20 May 2015
 
